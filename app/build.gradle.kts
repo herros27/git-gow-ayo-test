@@ -99,4 +99,7 @@ dependencies {
     // Android Instrumentation Test
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+
+    // Icons
+    implementation("androidx.compose.material:material-icons-extended")
 }
