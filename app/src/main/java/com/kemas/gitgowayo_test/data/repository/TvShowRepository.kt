@@ -2,7 +2,7 @@ package com.kemas.gitgowayo_test.data.repository
 
 import com.kemas.gitgowayo_test.data.remote.TvMazeApi
 import com.kemas.gitgowayo_test.domain.model.TvShow
-import com.kemas.gitgowayo_test.utils.toDomain
+import com.kemas.gitgowayo_test.util.toDomain
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -1,4 +1,4 @@
-package com.kemas.gitgowayo_test.utils
+package com.kemas.gitgowayo_test.util
 
 import androidx.core.text.HtmlCompat
 

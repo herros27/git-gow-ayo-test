@@ -46,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kemas.gitgowayo_test.domain.model.TvShow
 import com.kemas.gitgowayo_test.ui.theme.Yellow
-import com.kemas.gitgowayo_test.utils.stripHtml
+import com.kemas.gitgowayo_test.util.stripHtml
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.kemas.gitgowayo_test.utils
+package com.kemas.gitgowayo_test.util
 
 import com.kemas.gitgowayo_test.data.remote.dto.TvShowDto
 import com.kemas.gitgowayo_test.domain.model.TvShow
