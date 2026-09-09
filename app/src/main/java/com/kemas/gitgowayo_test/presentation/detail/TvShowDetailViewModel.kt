@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kemas.gitgowayo_test.data.repository.TvShowRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,8 +30,17 @@ class TvShowDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = TvShowDetailUiState.Loading
             try {
-                val show = repository.getDetailShows(showId)
-                _uiState.value = TvShowDetailUiState.Success(show)
+                // Fetch data secara paralel menggunakan async
+                val showDeferred = async { repository.getDetailShows(showId) }
+                val castDeferred = async { repository.getShowCast(showId) }
+                val seasonsDeferred = async { repository.getShowSeasons(showId) }
+                val episodesDeferred = async { repository.getShowEpisodes(showId) }
+                _uiState.value = TvShowDetailUiState.Success(
+                    show = showDeferred.await(),
+                    cast = castDeferred.await(),
+                    seasons = seasonsDeferred.await(),
+                    episodes = episodesDeferred.await()
+                )
             } catch (e: Exception) {
                 _uiState.value = TvShowDetailUiState.Error(
                     message = e.localizedMessage ?: "Gagal memuat detail film"
