@@ -24,12 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.kemas.gitgowayo_test.Greeting
 import com.kemas.gitgowayo_test.domain.model.TvShow
-import com.kemas.gitgowayo_test.ui.theme.GitgowayotestTheme
 import com.kemas.gitgowayo_test.ui.theme.Yellow
 
 @Composable
