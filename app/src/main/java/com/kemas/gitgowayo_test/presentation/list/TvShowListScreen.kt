@@ -172,7 +172,7 @@ fun TvShowPagingGrid(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Gagal memuat halaman berikutnya",
+                        text = "Failed to load the next page",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )

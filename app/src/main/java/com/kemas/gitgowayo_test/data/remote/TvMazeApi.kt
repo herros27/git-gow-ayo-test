@@ -1,4 +1,4 @@
-package com.kemas.gitgowayo_test.data.remote
+package com.kemas.gitgowayo_test
 
 import com.kemas.gitgowayo_test.data.remote.dto.CastDto
 import com.kemas.gitgowayo_test.data.remote.dto.EpisodeDto

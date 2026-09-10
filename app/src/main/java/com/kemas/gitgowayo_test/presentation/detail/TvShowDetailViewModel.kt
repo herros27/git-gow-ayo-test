@@ -46,7 +46,7 @@ class TvShowDetailViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.value = TvShowDetailUiState.Error(
-                    message = e.localizedMessage ?: "Gagal memuat detail film"
+                    message = e.localizedMessage ?: "Failed to load movie details"
                 )
             }
         }

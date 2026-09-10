@@ -65,7 +65,6 @@ import com.kemas.gitgowayo_test.ui.theme.GitgowayotestTheme
 import com.kemas.gitgowayo_test.ui.theme.Yellow
 import com.kemas.gitgowayo_test.util.toAnnotatedString
 
-
 @Composable
 fun TvShowDetailScreen(
     onBackClick: () -> Unit,
@@ -487,7 +486,7 @@ private fun TvShowDetailContentLoadingPreview() {
 private fun TvShowDetailContentErrorPreview() {
     GitgowayotestTheme {
         TvShowDetailContent(
-            uiState = TvShowDetailUiState.Error("Gagal memuat detail film. Periksa koneksi internet Anda."),
+            uiState = TvShowDetailUiState.Error("Failed to load movie details. Check your internet connection."),
             onBackClick = {},
             onRetry = {},
             onShareClick = {}
