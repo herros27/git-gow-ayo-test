@@ -92,23 +92,3 @@ fun TvShowItem(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun CardShowPreview() {
-//    val sampleShow = TvShow(
-//        id = 1,
-//        name = "Under the Dome",
-//        summary = "A thrilling drama about a small town trapped under a transparent dome.",
-//        premiered = "2013-06-24",
-//        url = "https://www.tvmaze.com/shows/1/under-the-dome",
-//        imageMedium = "https://static.tvmaze.com/uploads/images/medium_portrait/81/202627.jpg",
-//        imageOriginal = "https://static.tvmaze.com/uploads/images/original_untouched/81/202627.jpg",
-//        rating = 6.5
-//    )
-//    TvShowItem(
-//        show = sampleShow,
-//        onClick = {},
-//        modifier = Modifier.width(180.dp) // Diberi width agar ukurannya pas seperti di grid
-//    )
-//}
