@@ -184,7 +184,6 @@ fun TvShowDetailView(
         mutableIntStateOf(10)
     }
 
-    val visibleEpisodes = episodes.take(visibleEpisodeCount)
     Column(
         modifier = modifier
             .fillMaxSize()
