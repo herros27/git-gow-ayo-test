@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,17 +22,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.kemas.gitgowayo_test.domain.model.TvShow
 import com.kemas.gitgowayo_test.presentation.list.components.TvShowItem
-import com.kemas.gitgowayo_test.ui.theme.GitgowayotestTheme
+import com.kemas.gitgowayo_test.presentation.list.components.TvShowItemShimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -40,22 +42,21 @@ fun TvShowListScreen(
     onShowClick: (Int) -> Unit,
     viewModel: TvShowListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val shows = viewModel.showsPagingFlow.collectAsLazyPagingItems()
 
-    // Oper state dan event ke fungsi Content di bawah
     TvShowListContent(
-        uiState = uiState,
-        onShowClick = onShowClick,
-        onRetry = { viewModel.fetchShows() }
+        shows = shows,
+        onShowClick = onShowClick
     )
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun TvShowListContent(
-    uiState: TvShowListUiState,
+    shows: LazyPagingItems<TvShow>,
     onShowClick: (Int) -> Unit,
-    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -75,11 +76,22 @@ fun TvShowListContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (uiState) {
-                is TvShowListUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            when (val refreshState = shows.loadState.refresh) {
+                is LoadState.Loading -> {
+//                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(6) { // tampilkan 6 skeleton card
+                            TvShowItemShimmer()
+                        }
+                    }
                 }
-                is TvShowListUiState.Error -> {
+                is LoadState.Error -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -88,20 +100,21 @@ fun TvShowListContent(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = uiState.message,
+                            text = refreshState.error.localizedMessage ?: "Terjadi kesalahan koneksi",
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onRetry) {
+
+                        Button(onClick = { shows.retry() }) {
                             Text("Retry")
                         }
                     }
                 }
-                is TvShowListUiState.Success -> {
-                    TvShowGrid(
-                        shows = uiState.shows,
+                is LoadState.NotLoading -> {
+                    TvShowPagingGrid(
+                        shows = shows,
                         onShowClick = onShowClick
                     )
                 }
@@ -110,74 +123,66 @@ fun TvShowListContent(
     }
 }
 
+
 @Composable
-fun TvShowGrid(
-    shows: List<TvShow>,
+fun TvShowPagingGrid(
+    shows: LazyPagingItems<TvShow>,
     onShowClick: (Int) -> Unit,
     modifier: Modifier = Modifier
-){
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement= Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier.fillMaxSize()
     ) {
-        items(shows, key = {it.id}){ show ->
-            TvShowItem(
-                show = show,
-                onClick = {onShowClick(show.id)}
-            )
+        items(
+            count = shows.itemCount,
+            key = shows.itemKey { it.id }
+        ) { index ->
+            val show = shows[index]
+            if (show != null) {
+                TvShowItem(
+                    show = show,
+                    onClick = { onShowClick(show.id) }
+                )
+            }
         }
-    }
-
-}
-
-// 1. Preview Tampilan Berhasil (Success)
-@Preview(showBackground = true, name = "Success State")
-@Composable
-fun TvShowListContentSuccessPreview() {
-    val dummyShows = listOf(
-        TvShow(
-            id = 1,
-            name = "Under the Dome",
-            summary = "Sample summary 1",
-            premiered = "2013-06-24",
-            url = "",
-            imageMedium = "https://static.tvmaze.com/uploads/images/medium_portrait/81/202627.jpg",
-            imageOriginal = "",
-            rating = 6.5
-        ),
-        TvShow(
-            id = 2,
-            name = "Person of Interest",
-            summary = "Sample summary 2",
-            premiered = "2011-09-22",
-            url = "",
-            imageMedium = "https://static.tvmaze.com/uploads/images/medium_portrait/163/407679.jpg",
-            imageOriginal = "",
-            rating = 8.8
-        )
-    )
-
-    GitgowayotestTheme {
-        TvShowListContent(
-            uiState = TvShowListUiState.Success(dummyShows),
-            onShowClick = {},
-            onRetry = {}
-        )
-    }
-}
-
-// 2. Preview Tampilan Error
-@Preview(showBackground = true, name = "Error State")
-@Composable
-fun TvShowListContentErrorPreview() {
-    GitgowayotestTheme {
-        TvShowListContent(
-            uiState = TvShowListUiState.Error("Failed to connect to server"),
-            onShowClick = {},
-            onRetry = {}
-        )
+        // Loading indicator at the bottom during scrolling (Append Loading)
+        if (shows.loadState.append is LoadState.Loading) {
+            item(span = { GridItemSpan(2) }) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+//                    CircularProgressIndicator()
+                    TvShowItemShimmer()
+                }
+            }
+        }
+        // "Error & Retry" at the bottom when scrolling fails (Append Error)
+        if (shows.loadState.append is LoadState.Error) {
+            item(span = { GridItemSpan(2) }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Gagal memuat halaman berikutnya",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = { shows.retry() }) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
     }
 }

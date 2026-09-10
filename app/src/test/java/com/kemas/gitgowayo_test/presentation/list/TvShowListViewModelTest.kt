@@ -1,13 +1,15 @@
 package com.kemas.gitgowayo_test.presentation.list
 
+import androidx.paging.PagingData
 import app.cash.turbine.test
 import com.kemas.gitgowayo_test.data.repository.TvShowRepository
 import com.kemas.gitgowayo_test.domain.model.TvShow
 import com.kemas.gitgowayo_test.util.MainDispatcherRule
-import io.mockk.coEvery
+import com.kemas.gitgowayo_test.util.collectDataForTest
+import io.mockk.every
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -15,10 +17,9 @@ import org.junit.Test
 class TvShowListViewModelTest {
 
     @get:Rule
-    val mainDispatcherRule= MainDispatcherRule()
+    val mainDispatcherRule = MainDispatcherRule()
 
     private val repository: TvShowRepository = mockk()
-    private lateinit var viewModel: TvShowListViewModel
 
     private val dummyShows = listOf(
         TvShow(
@@ -34,37 +35,28 @@ class TvShowListViewModelTest {
     )
 
     @Test
-    fun `fetchShows success should emit Success state with data` () = runTest {
-        //Given
-        coEvery { repository.getShows(0) } returns dummyShows
+    fun `showsPagingFlow should emit PagingData`() = runTest {
 
-        //When
-        viewModel = TvShowListViewModel(repository)
+        // Given
+        val pagingData = PagingData.from(dummyShows)
 
-        //Then
-        viewModel.uiState.test {
-            val state = awaitItem()
-            assertTrue(state is TvShowListUiState.Success)
-            assertEquals(dummyShows, (state as TvShowListUiState.Success).shows)
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
+        every {
+            repository.getShowsPager()
+        } returns flowOf(pagingData)
 
-    @Test
-    fun `fetchShows failure should emit Error state with error message` () = runTest {
-        //Given
-        val errorMessage = "Network Error"
-        coEvery { repository.getShows(0) } throws RuntimeException(errorMessage)
+        // When
+        val viewModel = TvShowListViewModel(repository)
 
-        //When
-        viewModel = TvShowListViewModel(repository)
+        // Then
+        viewModel.showsPagingFlow.test {
 
-        //Then
-        viewModel.uiState.test {
-            val state = awaitItem()
-            assertTrue(state is TvShowListUiState.Error)
-            assertEquals(errorMessage, (state as TvShowListUiState.Error).message)
-            cancelAndIgnoreRemainingEvents()
+            val result = awaitItem()
+            val items = result.collectDataForTest(
+                mainDispatcherRule.testDispatcher
+            )
+
+            // PagingData successfully received.
+            assertEquals(dummyShows, items)
         }
     }
 }
