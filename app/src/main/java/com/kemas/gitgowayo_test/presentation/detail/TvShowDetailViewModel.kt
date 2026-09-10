@@ -30,7 +30,7 @@ class TvShowDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = TvShowDetailUiState.Loading
             try {
-                // Fetch data secara paralel menggunakan async
+                // Fetch data in parallel using async.
                 val showDeferred = async { repository.getDetailShows(showId) }
                 val castDeferred = async { repository.getShowCast(showId) }
                 val seasonsDeferred = async { repository.getShowSeasons(showId) }
